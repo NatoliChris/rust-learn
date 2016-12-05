@@ -74,4 +74,23 @@ fn main() {
 
 ```
 
+### Iterating through a list with for
+
+List items use ``.iter()`` to iterate through.
+
+Can also get the count with ``.iter().enumerate()``
+
+e.g.
+
+```
+
+for (index, v) in vec.iter().enumerate() {
+	if index != 0 {
+		try!(write!(f, ", "));
+	}
+	try!(write!(f, "{}: {}", index, v));
+}
+
+```
+
 
