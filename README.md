@@ -294,3 +294,125 @@ Can also label loops
 	}
 }
 ```
+
+For loops:
+
+```
+//Inclusive .. exclusive
+for n in 1..101 {
+	println!("{}", n);
+}
+```
+
+Matching with Bindings:
+
+```
+match age {
+	0 => println!("I don't exist!");
+	n @ 1 ... 12 => println!("I'm a real boy!");
+	n @ 13 ... 19 => println!("I'm a-live....");
+	_ => println!("I'm a default");
+}
+```
+
+
+``if let`` can be used to assign and check:
+
+```
+let number = Some(7);
+
+if let Some(i) = number {
+	println!("Matched {:?}" , i);
+}
+```
+
+---
+
+### Functions
+
+Allow closures
+
+```
+// Increments through function and closure
+fn increment (i:32) -> i32 {i + 1};
+
+// Increment just as closure
+let closure_inferred = |i| i + 1;
+```
+
+---
+
+### Modules
+
+Modules have public and private (default).
+
+```
+
+mod my_mod {
+	fn private_function() {
+		println!("Shh I'm private, only called with `my::private_function()`);
+	}
+
+	pub fn pub_function() {
+		println!("Hi I'm a public function `my::function()`);
+	}
+
+	pub mod nested {
+		pub fn function() {
+			println!("I'm nested");
+		}
+	}
+}
+```
+
+#### Super and Self.
+
+Super is used to call parent scope outside, 
+Self is used to refer to the current module
+
+Refer to [supes.rs](supes.rs) to find an example
+
+### Libraries
+
+Easily create library files:
+
+```
+$ rustc --create-type=lib test.rs
+libtest.rlib
+```
+
+Then to use them in a rust file:
+
+```
+extern crate test;
+```
+
+### Configs
+
+Can help to specify that certain conditions are met.
+
+Example, only compile on linux:
+
+```
+#[cfg(target_os = "linux")]
+fn some_function_only_linux() {
+}
+```
+
+--
+
+Or certain condition in flags:
+```
+#[cfg(some_cond)]
+fn condition_function() {
+	println!("Condition");
+}
+```
+
+Then to compile:
+
+```
+$ rustc --cfg some_cond named.rs
+$ ./named
+Condition
+```
