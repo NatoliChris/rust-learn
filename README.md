@@ -416,3 +416,70 @@ $ rustc --cfg some_cond named.rs
 $ ./named
 Condition
 ```
+
+---
+
+### Generics
+
+Simple like other languages.
+
+Structs
+
+```
+struct Random(A);
+```
+
+Functions
+
+```
+fn foo<T>(T) {
+
+}
+```
+
+Allows explicit type to generic.
+
+```
+struct SGen<T>(T);
+
+generic::<char>(SGen('a'));
+```
+
+---
+
+### Traits
+
+Collection of methods for unknown type that can be implemented for any data type.
+
+```
+
+trait Foo {
+	// functions here
+}
+
+struct Bar { ... }
+
+impl Foo for Bar {
+	// override the functions
+}
+
+```
+
+Basic implementations of traits with ``#[derive]``.
+Allow for a list of derivable traits:
+
+- Comparions 
+- Clones
+- Copy
+- Hash
+- Default
+- Zero
+- Debug
+
+e.g.
+
+```
+#[derive(Debug, Hash)]
+```
+
+
