@@ -222,3 +222,75 @@ Use the ``as`` keyword.
 println!("1000 as u16 is: {}", 1000 as u16);
 ```
 
+#### Alias types
+
+Can be used to give names to existing types. 
+
+```
+type NanoSecond = u64
+
+let nanoseconds: NanoSecond = 5 as u64
+```
+
+### Expressions 
+
+You can use expressions in variables
+
+```
+let x = 5;
+
+let y = {
+	let x_squared = x * x;
+	let x_cube = x_squared * x;
+
+	//Retun the following, will be assigned as `y`
+	x_cube + x_squared + x
+};
+```
+
+Some are special, suppresses expression.
+
+```
+// Will be assigned as () not any number.
+let z = {
+	2 * x;
+};
+```
+
+---
+
+### Control Flow
+
+Similar to other languages
+
+```
+if condition {
+
+} else if second_condition {
+
+}
+
+```
+
+Loops are the same, but can have infinite loops
+
+```
+//infinite loop
+loop {
+	
+	if condition {
+		//break out of the loop
+		break;
+	}
+}
+```
+
+Can also label loops
+```
+'outer: loop {
+	'inner loop {
+		//Break out of the outer loop.
+		break 'outer;
+	}
+}
+```
