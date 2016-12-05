@@ -93,4 +93,132 @@ for (index, v) in vec.iter().enumerate() {
 
 ```
 
+### Tuples
+
+Collection, just like other languages.
+
+Can be used as function arguments and return values.
+
+```
+
+fn reverse(pair: (i32, bool)) -> (bool, i32) {
+	let (integer, boolean) = pair;
+	(boolean, integer)
+}
+
+let (a,b,c,d) = tuple_variable;
+
+```
+
+### Arrays
+
+Need to be initialized, and the size is set:
+
+```
+let xs: [type; len] = [/* types here */];
+
+//can also be set in bulk
+
+let xy: [i32; 500] = [10; 500]; /* Sets every value to 10 */
+
+```
+
+---
+
+### Custom Types
+
+- Can ``enum`` for enumerations
+- Can ``struct`` for structs
+
+
+#### Enums:
+
+```
+enum NameHere {
+	items,
+	in_the,
+	enum,
+}
+
+```
+
+Enums can make good use of ``use``. E.g.:
+
+```
+enum Person {
+	A, 
+	B, 
+	C,
+}
+
+use Person::{A, B, C};
+
+//Equivalent to `Person::A`
+let me = A;
+
+match me {
+	Person::A => println!("Hello me!"),
+	B => println!("I'm a B? bzzz"),
+}
+```
+
+#### Constants
+
+- ``const``: unchangeable
+- ``static``: mutable ``mut`` with static lifetime
+
+```
+// 'static means it is mutable
+static LANGUAGE: &'static str = "Rust";
+//can't change a constant!
+const THRESHOLD: i32 = 10;
+```
+
+### Variable Binding
+
+Values can be bound to variables:
+
+```
+let _unused_variable = 3u32;
+let used_variable = 1u32;
+let copied_int = used_variable;
+```
+
+#### Mutability:
+
+Variable bindings immutable by default unles ``mut`` is used.
+
+```
+let _immutable_binding = 1;
+let mut mutable_binding = 1;
+
+mutable_binding += 1;		// All good
+_immutable_binding += 1;	// Error!
+```
+
+#### Scope / Shadow
+
+Scope can be in blocks
+
+```
+{
+	let temp_var = 2;
+	
+}
+```
+
+Shadowing is redeclaring a variable
+
+```
+let long_var = 1;
+let long_var = 'a';
+```
+
+### Casting
+
+Use the ``as`` keyword. 
+
+```
+println!("1000 as u16 is: {}", 1000 as u16);
+```
 
