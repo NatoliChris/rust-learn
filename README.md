@@ -482,4 +482,71 @@ e.g.
 #[derive(Debug, Hash)]
 ```
 
+---
 
+### Macro rules
+
+Macros end with a ``!``, expanded into source code compiled. 
+Just like C's ``#DEFINE``
+
+Example: A macro that prints hello
+
+```
+
+macro_rules! say_hello {
+	() => ( 
+		//takes no arguments and prints hello
+		println!("Hello!");
+	)
+}
+
+```
+
+Please see [macro_test.rs](macro_test.rs) for my testing of macros.
+
+
+---
+
+### Error Handling
+
+#### Panic
+
+Similar to golang, panic prints error:
+
+```
+panic!("error messageee!");
+```
+
+#### Option / Unwrap
+
+``Option`` is an enum, either ``Some(T)`` or ``None``. 
+
+Example:
+
+```
+fn test_me(arg: Option<&str>) {
+	let a = arg.unwrap();
+	//Unwrap will panic if it receives a `None`
+}
+
+```
+
+#### try!
+
+Try is like unwrap but will return an ``Err``.
+
+```
+let elem = try!(array[0]);
+```
+
+
+#### Definining custom error type
+
+Present a nice error message to the user, holds critical information.
+
+```
+Err(EmptyVec);							// Good
+Err("At least one element".to_owned()); //bad
+```
+
+---
