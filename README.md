@@ -669,3 +669,61 @@ let _result = child.wait().unwrap();
 
 
 See [waitingchild.rs](waitingchild.rs)
+
+---
+
+### Program Args 
+
+Command line arguments through iterator
+
+```
+use std::env;
+
+let args: Vec<String> = env::args().collect();
+```
+
+#### Parsing Arguments
+
+Suggested to use matching because it is simple
+
+See [arguments.rs](arguments.rs)
+
+
+---
+
+## Miscellaneous 
+
+### Documentation
+
+Rustdoc similar to Javadoc
+
+``///`` to start the rustdoc and it supports markdown!
+
+### Testing
+
+``#[test]`` signifies the start of a unit test, must be carefully configured:
+
+```
+#[cfg(not(test))]
+fn main() {
+	println!("You must run this as a test file!");
+}
+
+#[cfg(test)]
+
+mod test {
+	#[test]
+	fn .... {
+		...
+	}
+}
+
+```
+
+Need to compile with testing flag:
+
+```
+rustc --test testingfile.rs
+```
+
+See [testing.rs](testing.rs)
