@@ -621,3 +621,51 @@ let mut file = match File::create(&path) {
 See [fileio.rs](fileio.rs)
 
 
+---
+
+### Working with children - Child Processes
+
+Works with child processes, ``process::Output`` is the output of finished.
+``process::Command`` is a process builder. 
+
+```
+use std::process::Command;
+
+let output = Command::new("rustc")
+	.arg("--version")
+	.output().unwrap_or_else(|e| {
+		panic!("Failed to execute: {}", e)
+	});
+
+```
+
+See [simplechild.rs](simplechild.rs)
+
+#### Processes also need pipes
+
+Similar to other languages, especially C.
+
+```
+use std::process::{Command, Stdio};
+
+Command::new("wc")
+		.stdin(Stdio::piped())
+		.stdout(Stdio::piped())
+		.spawn()
+```
+
+See [pipedchild.rs](pipedchild.rs)
+
+#### Waiting ....
+
+Need to wait for a process to finish, call ``Child::wait``.
+
+```
+use std::process::Command;
+
+let mut child = Command::new("sleep").arg("5").spawn().unwrap();
+let _result = child.wait().unwrap();
+```
+
+
+See [waitingchild.rs](waitingchild.rs)
