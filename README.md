@@ -585,3 +585,39 @@ let (tx, rx): (Sender<i32>, Receiver<i32>) = mpsc::channel();
 See [channel_test.rs](channel_test.rs)
 
 
+---
+
+### File IO
+
+#### Open
+
+Open used for read only. File owns resource, takes care of closing file when dropped.
+
+```
+let path = Path::new("/path/to/file");
+let mut file = match File::open(&path) {
+	// description of io::Error is a string
+	Err(why) => panic("{}: {}", display, why.description()),
+	Ok(file) => file,
+};
+```
+
+When the file goes out of scope, it is closed.
+
+#### Create
+
+Write only mode, if the file exists it is **Destroyed!**
+
+```
+let path = Path::new("/path/to/outfile.txt");
+
+let mut file = match File::create(&path) {
+	Err(why) => panic(....),
+	Ok(file) => file,
+};
+
+```
+
+See [fileio.rs](fileio.rs)
+
+
