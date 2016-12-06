@@ -550,3 +550,38 @@ Err("At least one element".to_owned()); //bad
 ```
 
 ---
+
+### Threads
+Has a ``spawn`` function:
+
+```
+thread::spawn(move || {
+	println!("Thread!");
+})
+
+```
+
+See [threads_test.rs](threads_test.rs)
+
+### Channels - just like Go
+
+Two endpoints, ``Sender`` and ``Receiver``.
+
+Need to define what information is being sent.
+
+
+The ``send(x)`` method on the sender is *non blocking*
+The ``recv()`` method on the receiver **IS** blocking.
+
+```
+let (tx, rx): (Sender<i32>, Receiver<i32>) = mpsc::channel();
+
+// Loop
+	let thread_tx = tx.clone(); // clone the sender
+	thread_tx.send(i).unwrap();
+//End loop
+```
+
+See [channel_test.rs](channel_test.rs)
+
+
