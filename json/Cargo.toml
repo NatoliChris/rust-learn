@@ -1,0 +1,8 @@
+[package]
+name="jsontest"
+version="0.1.0"
+authors=["C<c@n.c>"]
+
+[dependencies]
+rustc-serialize = "0.3"
+
