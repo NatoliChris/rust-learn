@@ -1,0 +1,7 @@
+[package]
+name="time_world"
+version="0.1.0"
+authors=["C<c@n.c>"]
+
+[dependencies]
+libc="0.2"
