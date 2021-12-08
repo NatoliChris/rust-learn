@@ -419,6 +419,9 @@ where
 
 ## Iterators!
 
+* Iterators are quick!
+  - Rust uses the *zero-cost abstraction* : no additional runtime overhead.
+  - C++ implementations obey the zero-overhead principle.
 * `.iter()` doesn't do anything until it is called; It provides an iterator over *immutable* references.
 	- Iterators are lazy and will do nothing until consumed.
 	- `into_iter` will consume and turn it into mutable references.
@@ -459,3 +462,69 @@ impl Iterator for Counter {
 	}
 }
 ```
+
+## Cargo and Crates
+
+* Specify different release and optimisations in the `Cargo.toml`
+  - By default, opt level is 0; sets the optimisation level.
+  ```rust
+  [profile.dev]
+  opt-level = 0
+
+  [profile.release]
+  opt-level = 3
+  ```
+* Publish the crates on cargo.io for others to use.
+    - ``cargo publish`` will publish the crate.
+    - ``cargo yank --vers 1.0.1`` removes the version specified from crates.io
+
+### Workspaces
+
+* Set of packages that share some `Cargo.lock` and output directory.
+
+```bash
+cargo new add
+```
+
+In `Cargo.toml`:
+
+```
+[workspace]
+
+members = [
+    "add",
+]
+```
+
+Will result in;
+
+```
+├── Cargo.lock
+├── Cargo.toml
+├── add
+│   ├── Cargo.toml
+│   └── src
+│       └── main.rs
+└── target
+```
+
+* Also works with multiple workspaces.
+* Cargo.toml points by using a relative path inside the second workspace
+  - E.g.: ``add = { path = "../add" }``
+
+## Documentation
+
+* Rust doc `///` supports markdown formatting.
+    - `//!` adds documentation to the item that contain sthe comment, rather than documentation to items following the comments.w
+        * Used for crate as a whole (for example).
+* Compile with ``cargo doc`` (e.g. ``cargo doc --open`` will build HTML for current project.)
+* Specific headings to be used for documentation:
+  - `# Examples` - sections that will be titled examples.
+  - `# Panics` - Section about scenarios that could cause a panic.
+  - `# Errors` - Section that describes errors that might return with a `Result` type.
+  - `# Safety` - If function is `unsafe` --> why?
+* Example code is also tested with `cargo test` to see that it builds!
+* Modules
+  - ``pub mod ... { pub fn ... }`` will export to the documentation.
+  - Can also use ``pub mod ... ; pub use self::mod::function``
+    - Pub use gives you flexibility in structure and crate as well as decouples internal structure to what is presented to users.
