@@ -365,55 +365,55 @@ where
 
 * Improving with a map?
 
-	```rust
-	use std::collections::HashMap;
+  ```rust
+  use std::collections::HashMap;
 
-	struct CacheWithMap<T>
-	where
-			T: Fn(u32) -> u32,
-	{
-			calculation: T,
-			values: HashMap<u32, u32>,
-	}
+  struct CacheWithMap<T>
+  where
+      T: Fn(u32) -> u32,
+  {
+      calculation: T,
+      values: HashMap<u32, u32>,
+  }
 
-	impl <T> CacheWithMap<T>
-	where
-			T: Fn(u32) -> u32,
-	{
-			fn new(calculation: T) -> CacheWithMap<T> {
-					CacheWithMap {
-							calculation,
-							values: HashMap::new(),
-					}
-			}
+  impl <T> CacheWithMap<T>
+  where
+      T: Fn(u32) -> u32,
+  {
+      fn new(calculation: T) -> CacheWithMap<T> {
+          CacheWithMap {
+              calculation,
+              values: HashMap::new(),
+          }
+      }
 
-			fn value(&mut self, arg: u32) -> u32 {
-					// Get the value from the map
-					match self.values.get(&arg)  {
-							Some(v) => *v,
-							None => {
-									// Run the calculation
-									let v = (self.calculation)(arg);
-									self.values.insert(arg, v);
-									v
-							}
-					}
-			}
-	}
-	```
+      fn value(&mut self, arg: u32) -> u32 {
+          // Get the value from the map
+          match self.values.get(&arg)  {
+              Some(v) => *v,
+              None => {
+                  // Run the calculation
+                  let v = (self.calculation)(arg);
+                  self.values.insert(arg, v);
+                  v
+              }
+          }
+      }
+  }
+  ```
 
 * Closures are able to access the environment around them as part of scope.
 
-	```rust
-	let x = 4;
-	let equal_x = |z| z == x;
-	```
+  ```rust
+  let x = 4;
+  let equal_x = |z| z == x;
+  ```
 
 * Function traits:
-	- **FnOnce** - consumes the variable it captures from enclosing scope.
-		* The `Once` part of the name suggests it can't take ownership more than once. (only callable once).
-	- **FnMut** - Mutable; is able to change the environment.
-	- **Fn** - Borrows from the environment immutably.
+  - **FnOnce** - consumes the variable it captures from enclosing scope.
+    * The `Once` part of the name suggests it can't take ownership more than once. (only callable once).
+  - **FnMut** - Mutable; is able to change the environment.
+  - **Fn** - Borrows from the environment immutably.
 * Note also, the `move` keyword in closures may still let them implement `Fn` or `FnMut`, because types are determined by what the closure **does** rather than how it captures variables.
 
 
@@ -423,15 +423,15 @@ where
   - Rust uses the *zero-cost abstraction* : no additional runtime overhead.
   - C++ implementations obey the zero-overhead principle.
 * `.iter()` doesn't do anything until it is called; It provides an iterator over *immutable* references.
-	- Iterators are lazy and will do nothing until consumed.
-	- `into_iter` will consume and turn it into mutable references.
+  - Iterators are lazy and will do nothing until consumed.
+  - `into_iter` will consume and turn it into mutable references.
 * Implementing an iterator requires the `type Item` defined to be used with `next()`.
 * When making a `.iter()` it needs to be `mut` because `.next()` consumes the item from the iterator.
 * Methods can consume the iterator
-	- `.next()` - A 'consuming adaptor' that uses up the iterator and returns the next.
-	- `.sum()`, ...,
-	- `.collect()` (will consume the iterator and return a vector)
-	- etc..
+  - `.next()` - A 'consuming adaptor' that uses up the iterator and returns the next.
+  - `.sum()`, ...,
+  - `.collect()` (will consume the iterator and return a vector)
+  - etc..
 
 ### Creating own iterator through Iterator trait
 
@@ -439,27 +439,27 @@ Example: a finite counter that counts up to 10.
 
 ```rust
 struct MyCounter {
-	count: u32,
+  count: u32,
 }
 
 impl MyCounter {
-	fn new() -> MyCounter {
-		MyCounter { count: 0 }
-	}
+  fn new() -> MyCounter {
+    MyCounter { count: 0 }
+  }
 }
 
 // Implement the iterator trait
 impl Iterator for Counter {
-	type Item = u32; 						// As in docs, requires an item type to be defined!
+  type Item = u32;            // As in docs, requires an item type to be defined!
 
-	fn next(&mut self) -> Option<Self::Item> {
-		if self.count < 10 {
-			self.count += 1;
-			Some(self.count)
-		} else {
-			None
-		}
-	}
+  fn next(&mut self) -> Option<Self::Item> {
+    if self.count < 10 {
+      self.count += 1;
+      Some(self.count)
+    } else {
+      None
+    }
+  }
 }
 ```
 
@@ -528,3 +528,129 @@ Will result in;
   - ``pub mod ... { pub fn ... }`` will export to the documentation.
   - Can also use ``pub mod ... ; pub use self::mod::function``
     - Pub use gives you flexibility in structure and crate as well as decouples internal structure to what is presented to users.
+
+## Smart Pointers
+
+* Similar concept to C++ smart pointers.
+* Overview
+  - `Rc<T>` - reference counter -> multiple owners of the same data;
+    - `Box` and `RefCell` have single owners.
+  - `Box<T>` - immutable / mutable borrows checked at compile time.
+    - `Rc` only allows immutable checked at compile time.
+    - `RefCell` allows immutable/mutable checked at **runtime**.
+  - `RefCell<T>` - mutable borrows checked at runtime that also allows mutation.
+
+### Box<T>
+
+* Allow you to store data on heap, rather than stack.
+* Included in prelude, no need to require `use` for anything.
+* Like a smart pointer because implements `Deref` and has `Drop` trait.
+* Minimal performance overhead.
+* Uses:
+  - Type with unknown size at compile time but requires context of known size.
+  - Large amount of data to transfer ownership but don't want copy.
+  - Own a value and only care that type implements a particular trait (rather than is a particular type)
+* Useful for *recursive types*.
+  - Example: a `cons` list (`cons` is used as a construct function taken from Lisp)
+  ```rust
+  // Note: the box is useful because otherwise "List" type would have infinite size!
+  //        this is because Box is a pointer and has a size, therefore can be easily known.
+  enum List {
+    Cons(i32, Box<List>),         // Represents the list with Box so recursive will work.
+    Nil,
+  }
+
+  fn main() {
+    let lst = Cons(1, Cons(2, Cons(3, Nil)));
+  }
+  ```
+
+### Treating smart pointers as regular references with Deref trait.
+
+* `Deref` trait customises the behaviour of `*` dereference. (immutable)
+  * ``DerefMut`` trait allows you to override the `*` on mutable references.
+
+Example: A fake box that stores data on the stack as an example.
+
+```rust
+use std::ops::Deref;
+
+struct MyFakeBox<T>(T);
+
+impl<T> MyFakeBox<T> {
+  fn new(x: T) -> MyFakeBox<T> {
+    MyFakeBox(x)
+  }
+}
+
+impl<T> Deref for MyFakeBox<T> {
+  type Target = T;
+
+  fn deref(&self) -> &Self::Target {
+    &self.0
+  }
+}
+
+// Now usage
+fn main() {
+  let x = 5;
+  let normal_box = Box::new(x);
+
+  assert_eq!(5, *normal_box);
+
+  // Now with new box
+  let my_box = MyFakeBox::new(x);
+  assert_eq(5, *my_box);
+}
+```
+
+* Deref coercion makes it possible to call a function where the arguments don't quite match but can be converted.
+  - E.g. `hello(name: &str)` can take a `String` since `String.deref()` returns an `&str`.
+  - Very helpful for being able to write without explicitly specifying references and dereferences.
+* Rust does deref coercion when it finds types and trait implementations in three cases:
+  - From `&T` to `&U` when `T:Deref<Target=U>` (T derefs in to U)
+  - From `&mut T` to `&mut U` when `T:DerefMut<Target=U>` (T's mutable dereference turns into type U).
+  - From `&mut T` to `&U` when `T: Deref<Target=U>` (A mutable T dereferences into immutable type U?)
+      - > Rust will also coerce a mutable reference to an immutable one. But the reverse is not possible: immutable references will never coerce to mutable references. Because of the borrowing rules, if you have a mutable reference, that mutable reference must be the only reference to that data (otherwise, the program wouldn't compile). Converting one mutable reference to one immutable reference will never break the borrowing rules.
+
+### Cleanups
+
+* Lower level languages need explicit `free`
+* `Drop` trait requires the `drop` function to be implemented. (destructor)
+  - Facilitates the clean up of the data (drop when instance goes out of scope)
+* Early drop can be done with `std::mem::drop` using ``drop(instance_here)``
+
+### Rc<T> - Reference counted smart pointer.
+
+* ``Rc<T>`` is a smart poiinter to know how many references to see whether still in use.
+* From standard lib: ``use std::rc::Rc``
+* Useful in sharing data.
+  - ``Rc::new(some_thing_here)``.
+* Cloning `Rc::clone()` increases the reference count.
+  - Count can be found with ``Rc::strong_count(your_rc_var_here)``
+
+### RefCell<T> and interior mutability
+
+* Interior mutability is a design pattern in rust -- mutate data even if immutable references to that data exist.
+* Mutating this data requires the use of `unsafe`.
+* `RefCell<T>` represents ownership of the data.
+  - Onwership and borrowing rules are enforced during *runtime*, not compile time like `Box<T>`
+  - Why? Some safe-memory operations may be allowed in runtime, but not at compile time.
+    * Note this may be because the compiler doesn't understand, so `RefCell` is used.
+* Interior mutability (example: mock objects)
+  - `borrow` and `borrow_mut`.
+  - Panic occurs at runtime.
+* `Rc<T>` and `RefCell<T>` can be combined to provide multiple owners of mutable data.
+  ```rust
+  let value = Rc::new(RefCell::new(5));
+  let a = Rc::new(Cons(Rc::clone(&value), Rc::new(Nil)));
+  value.borrow_mut() += 10;
+  ```
+
+### Reference cycles can leak memory!
+
+* `Rc<T>` and `RefCell<T>` can lead to some memory leaks, despite the rust memory safety.
+* A `Weak<T>` reference might be dropped.
+* Calling `upgrade` on a `Weak<T>` will return `Option<Rc<T>>`.
+* Count can be seen as `strong_count` and `weak_count`.
+* A weak can be made by ``Weak<...>`` and ``Weak::new()``
