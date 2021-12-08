@@ -168,7 +168,7 @@ match dice_roll {
 ## Ownership!
 
 * Shallow copy in rust is a "move".
-* Ownership passin ga value to a function is similar to assigning a value to a variable.
+* Ownership passing a value to a function is similar to assigning a value to a variable.
 * Returning value transfers ownership.
   * However, that's too tedious so get the reference.
 * A reference (`&`) refers to the value but does **not** own it.
@@ -312,3 +312,150 @@ impl Summary for MyStruct {
 * Integration tests are placed in a `tests` directory alongside `src`.
   - This only works for library (`src/lib`) crates.
 
+## Closures
+
+* params in vertical pipes (`|`), can be typed or infer type at compile time.
+
+```rust
+let some_closure = |x| {
+  do_some_work()
+  println!("do something");
+  x
+}
+
+// Simple, single expression closures aren't don't require brackets.
+let simple_closure = |x| x+1;
+```
+
+* Example of a struct that caches the value of a closure (so it doesn't need to be run multiple times)
+  - Note; this example assumes that it will always get the same value!
+```rust
+struct CacheMyClosure<T>
+where
+  T: Fn(u32) -> u32,    // Defines the type bound on the generic T.
+{
+  calculation: T,       // This will be the closure function to calculate
+  value: Option<u32>,
+}
+
+// Implementation
+impl <T> CacheMyClosure<T>
+where
+  T: Fn(u32) -> u32,
+{
+  fn new(calculation: T) -> CacheMyClosure<T> {
+      CacheMyClosure {
+        calculation,
+        value: None,
+      }
+  }
+
+  fn value(&mut self, arg: u32) -> u32 {
+    match self.value {
+      Some(v) => v,
+      None => {
+        // Run the closure by calling it: ()()
+        let v = (self.calculation)(arg);
+        self.value = Some(v);
+        v
+    }
+  }
+}
+```
+
+* Improving with a map?
+
+	```rust
+	use std::collections::HashMap;
+
+	struct CacheWithMap<T>
+	where
+			T: Fn(u32) -> u32,
+	{
+			calculation: T,
+			values: HashMap<u32, u32>,
+	}
+
+	impl <T> CacheWithMap<T>
+	where
+			T: Fn(u32) -> u32,
+	{
+			fn new(calculation: T) -> CacheWithMap<T> {
+					CacheWithMap {
+							calculation,
+							values: HashMap::new(),
+					}
+			}
+
+			fn value(&mut self, arg: u32) -> u32 {
+					// Get the value from the map
+					match self.values.get(&arg)  {
+							Some(v) => *v,
+							None => {
+									// Run the calculation
+									let v = (self.calculation)(arg);
+									self.values.insert(arg, v);
+									v
+							}
+					}
+			}
+	}
+	```
+
+* Closures are able to access the environment around them as part of scope.
+
+	```rust
+	let x = 4;
+	let equal_x = |z| z == x;
+	```
+
+* Function traits:
+	- **FnOnce** - consumes the variable it captures from enclosing scope.
+		* The `Once` part of the name suggests it can't take ownership more than once. (only callable once).
+	- **FnMut** - Mutable; is able to change the environment.
+	- **Fn** - Borrows from the environment immutably.
+* Note also, the `move` keyword in closures may still let them implement `Fn` or `FnMut`, because types are determined by what the closure **does** rather than how it captures variables.
+
+
+## Iterators!
+
+* `.iter()` doesn't do anything until it is called; It provides an iterator over *immutable* references.
+	- Iterators are lazy and will do nothing until consumed.
+	- `into_iter` will consume and turn it into mutable references.
+* Implementing an iterator requires the `type Item` defined to be used with `next()`.
+* When making a `.iter()` it needs to be `mut` because `.next()` consumes the item from the iterator.
+* Methods can consume the iterator
+	- `.next()` - A 'consuming adaptor' that uses up the iterator and returns the next.
+	- `.sum()`, ...,
+	- `.collect()` (will consume the iterator and return a vector)
+	- etc..
+
+### Creating own iterator through Iterator trait
+
+Example: a finite counter that counts up to 10.
+
+```rust
+struct MyCounter {
+	count: u32,
+}
+
+impl MyCounter {
+	fn new() -> MyCounter {
+		MyCounter { count: 0 }
+	}
+}
+
+// Implement the iterator trait
+impl Iterator for Counter {
+	type Item = u32; 						// As in docs, requires an item type to be defined!
+
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.count < 10 {
+			self.count += 1;
+			Some(self.count)
+		} else {
+			None
+		}
+	}
+}
+```
