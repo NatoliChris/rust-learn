@@ -517,7 +517,7 @@ Will result in;
 ## Documentation
 
 * Rust doc `///` supports markdown formatting.
-    - `//!` adds documentation to the item that contain sthe comment, rather than documentation to items following the comments.w
+    - `//!` adds documentation to the item that contains the comment, rather than documentation to items following the comments
         * Used for crate as a whole (for example).
 * Compile with ``cargo doc`` (e.g. ``cargo doc --open`` will build HTML for current project.)
 * Specific headings to be used for documentation:
@@ -624,7 +624,7 @@ fn main() {
 
 ### Rc<T> - Reference counted smart pointer.
 
-* ``Rc<T>`` is a smart poiinter to know how many references to see whether still in use.
+* ``Rc<T>`` is a smart pointer to know how many references to see whether still in use.
 * From standard lib: ``use std::rc::Rc``
 * Useful in sharing data.
   - ``Rc::new(some_thing_here)``.
@@ -636,7 +636,7 @@ fn main() {
 * Interior mutability is a design pattern in rust -- mutate data even if immutable references to that data exist.
 * Mutating this data requires the use of `unsafe`.
 * `RefCell<T>` represents ownership of the data.
-  - Onwership and borrowing rules are enforced during *runtime*, not compile time like `Box<T>`
+  - Ownership and borrowing rules are enforced during *runtime*, not compile time like `Box<T>`
   - Why? Some safe-memory operations may be allowed in runtime, but not at compile time.
     * Note this may be because the compiler doesn't understand, so `RefCell` is used.
 * Interior mutability (example: mock objects)
@@ -723,7 +723,7 @@ for _ in 0..10 {
           fn draw(&self);
         }
 
-        // Cannot be used becuase it returns Self
+        // Cannot be used because it returns Self
         // And trait objects don't have concrete type!
         trait Draw {
           fn draw(&self) -> Self;
