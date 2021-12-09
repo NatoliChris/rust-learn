@@ -167,7 +167,9 @@ match dice_roll {
 
 ## Ownership!
 
-* Shallow copy in rust is a "move".
+* Assignment is a *move*, where the compiler tracks ownership of the data.
+  - The `Copy` trait allows copying on assignment.
+  - `.clone()` performs a deep copy (performs memcpy)
 * Ownership passing a value to a function is similar to assigning a value to a variable.
 * Returning value transfers ownership.
   * However, that's too tedious so get the reference.
@@ -654,3 +656,47 @@ fn main() {
 * Calling `upgrade` on a `Weak<T>` will return `Option<Rc<T>>`.
 * Count can be seen as `strong_count` and `weak_count`.
 * A weak can be made by ``Weak<...>`` and ``Weak::new()``
+
+## Concurrency
+
+* Creating threads
+  - ``use std::thread`` then ``thread::spawn(||...)`` (it's a closure)
+* Waiting to finish uses a `JoinHandle`
+  - ``handle = thread::spawn...`` then ``handle.join().unwrap()``
+  - ensures that the thread finishes. (normal thread.join as other langs)
+* To move values into the thread, you can use `move` : ``thread::spawn(move || {}....``
+
+### Message passing
+
+* ``std::sync::mpsc`` (multiple producers, single consumer) message passing channel.
+* Sending a value into the channel will transfer ownership.
+* Clone transmitters for channels to use in multiple threads.
+
+### Mutex
+
+* Rust ``std::sync::Mutex`` has a `Mutex<T>` used like: ``Mutex::new(some_thing)``
+  - To use the mutex: ``mutex_instance.lock().unwrap()``
+  - Returns a `LockResult`, which is why we need to `unwrap`.
+* To share between threads use `Arc`!
+  - ``Arc::new(Mutex::new(...))`` then in the thread ``Arc::clone(&mutex_instance)``
+
+```rust
+let myCounter: Arc<Mutex<u32>> = Arc::new(Mutex::new(0));
+
+for _ in 0..10 {
+  let thread_counter = Arc::clone(&counter);
+  let handle = thread::spawn(move || {
+    let mut num = thread_counter.lock().unwrap();
+    *num += 1;
+  });
+}
+
+// ...
+```
+
+### Send and Sync Traits
+
+* The `Send` trait indicates that ownership can be transferred between threads.
+  - *Almost* all types implement this trait, but there are exceptions (i.e. `Rc<T>`)
+* The `Sync` trait indicates that it is safe to be **referenced** from multiple threads.
+  - Any type `T` is `Sync` *if* `&T` is `Send`.
