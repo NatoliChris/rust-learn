@@ -731,3 +731,166 @@ for _ in 0..10 {
         ```
     * This is because once you use a trait object, Rust doesn't know the concrete type!
   - No generic type parameters.
+
+## Patterns
+
+* Patterns come in two forms:
+  - **Refutable**: Patterns that can fail to match for some possible value.
+    * E.g. `Some(x)` will not match if `None`
+    * Useful for `if let` and must be used in `match` arms (except for the last arm)
+  - **Irrefutable**: Patterns that will match for any possible value.
+    * E.g. ``let x = 5``
+* `match` expressions are used quite heavily.
+  - The `_` match arm is a catch-all, typically used in the final arm.
+  - Multiple patterns can use the pipe `|` e.g. `1 | 2` to match one or two.
+  - Range can be matched with `..`, e.g. ``1..=5`` will match 1 to 5 inclusive.
+* `if let` expressions
+  - Shorter way to write a `match` on one expression.
+  - Can be tangled in with `else` and `else if`
+  - More flexibility than `match`, but compiler **will not check exhaustiveness like a match**.
+* `while let` is also a thing?
+  - ``while let Some(thing) = stack.pop() { ... }``
+
+### Destructuring
+
+* Can destructure structs, enums, tuples and references.
+
+Structs
+
+```rust
+struct Point {
+  x: i32,
+  y: i32,
+}
+
+fn main() {
+  let p = Point { x: 0, y: 1 };
+  // Destructure to variables a and b
+  let Point {x: a, y: b } = p;
+
+  // Or just x and y
+  let Point { x, y } = p;
+
+  // Use in match
+  match p {
+    Point { x, y: 0 } => println!("On the x axis at {}", x),
+    Point { x: 0, y } => println!("On the y axis at {}", y),
+    Point { x, y } => println!("On neither axis: ({}, {})", x, y),
+  }
+}
+```
+
+Enums
+
+```rust
+enum Msg {
+  Quit,
+  Move { x: i32, y: i32 },
+  Write(String),
+}
+
+fn main() {
+  let msg = Msg::Move(1, 2);
+
+  match msg {
+    Msg::Quit => {
+      println!("Quit")
+    }
+    Msg::Move { x, y } => {
+      // ...
+    }
+    // ...
+  }
+}
+```
+
+Nested structs and enums
+
+```rust
+enum Colour {
+  RGB(i32, i32, i32),
+  CMYK(i32, i32, i32, i32),
+}
+
+enum Msg {
+  Quit,
+  Move { x: i32, y: i32 },
+  ChangeCol(Colour),
+}
+
+fn main() {
+  let msg = Msg::ChangeCol(Colour::RGB(170, 187, 204));
+
+  match msg {
+    Msg::ChangeCol(Colour::RGB(r, g, b)) => {
+      println!("have an rgb colour {},{},{}", r, g, b)
+    },
+    Msg::ChangeCol(Colour::CMYK(c, m, y, k)) => {
+      println!("Matched cmyk, {}, {}, {}, {}", c, m, y, k)
+    },
+    // ...
+    _ => println!("Another thing?")
+  }
+}
+```
+
+### Ignoring values
+
+* `_` pattern ignores the entire value.
+  - Used in match expressions as a catch-all
+  - Can be used in function params ``fn foo(_: i32, y: i32)`` if not used.
+  - Unused variables start with `_`, for example: `_x`.
+      * Note: unused variable still consumes the variable and moves!
+      * If you don't want to move ownership, then use only `_` since it does not take ownership.
+* `..` ignores part of the pattern. (Will expand to as many values as needed)
+  - Can be used in destructuring: ``Point { x, .. }`` will only get `x`.
+  - Make sure it is not ambiguous though!
+    ```rust
+    let numbers = (2, 4, 8, 16, 32);
+
+    match numbers {
+        (.., second, ..) => {
+            println!("Some numbers: {}", second)
+        },
+    }
+    ```
+
+### Match Guards
+
+* Additional `if` condition specified after the pattern in a match.
+  ```rust
+    let num = Some(4);
+
+    let y = 10;
+
+    match num {
+        Some(x) if x < 5 => println!("less than five: {}", x),
+        // NOTE: since y is not introduced as a new variable, y from outside is used.
+        Some(n) if n == y => println!("Matched, n = {}", n),
+        Some(x) => println!("{}", x),
+        None => (),
+    }
+  ```
+
+
+### @ bindings
+
+* `@` operator lets us create a variable that holds a value at the time of testing
+  ```rust
+    enum Message {
+        Hello { id: i32 },
+    }
+
+    let msg = Message::Hello { id: 5 };
+
+    match msg {
+        Message::Hello {
+            // This id_variable is now populated as 5
+            id: id_variable @ 3..=7,
+        } => println!("Found an id in range: {}", id_variable),
+        Message::Hello { id: 10..=12 } => {
+            println!("Found an id in another range")
+        }
+        Message::Hello { id } => println!("Found some other id: {}", id),
+    }
+  ```
