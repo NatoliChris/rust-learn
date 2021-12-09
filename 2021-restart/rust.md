@@ -700,3 +700,34 @@ for _ in 0..10 {
   - *Almost* all types implement this trait, but there are exceptions (i.e. `Rc<T>`)
 * The `Sync` trait indicates that it is safe to be **referenced** from multiple threads.
   - Any type `T` is `Sync` *if* `&T` is `Send`.
+
+## OOP
+
+* Encapsulation can be controlled using `pub` keyword
+  - ``pub fn`` as opposed to ``fn``.
+  - As well as used on structs for public and non-public fields.
+* Polymorphism can be done by implementing **traits**.
+  - ``impl {trait name} for {struct}``
+* Trait object perform *Dynamic Dispatch*, meaning compiler can't tell method calls at compile time.
+  * A trait object is a pointer to a trait (`Box`, `Arc`, `Rc`, `&`..).
+  * Good read: [stack overflow post](https://stackoverflow.com/questions/27567849/what-makes-something-a-trait-object)
+  * And [rust reference](https://doc.rust-lang.org/reference/types/trait-object.html)
+  * [dynamic dispatch](https://en.wikipedia.org/wiki/Dynamic_dispatch)
+      - Implementation of a polymorphic operation to call at **run time**.
+* Trait object safety, a trait is object safe if all the methods:
+  - Return type isn't `Self`.
+      - Examples:
+        ```rust
+        // Can be used as trait object (object-safe)
+        trait Draw {
+          fn draw(&self);
+        }
+
+        // Cannot be used becuase it returns Self
+        // And trait objects don't have concrete type!
+        trait Draw {
+          fn draw(&self) -> Self;
+        }
+        ```
+    * This is because once you use a trait object, Rust doesn't know the concrete type!
+  - No generic type parameters.
