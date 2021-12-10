@@ -894,3 +894,114 @@ fn main() {
         Message::Hello { id } => println!("Found some other id: {}", id),
     }
   ```
+
+## Advanced things
+
+### Unsafe
+
+* Allows bypassing the safety checks of Rust's compiler
+* `unsafe` keyword allows:
+  - Dereference raw pointers
+    * Raw pointers are different from references and smart pointers.
+    * They aren't guaranteed to point to valid memory (raw pointers, used like C need to be separately handled)
+    * Are allowed to be null
+    * Don't implement automatic cleanup.
+    * Note: creating a raw pointer doesn't need `unsafe`, but dereferencing does.
+    * Good when interfacing with C functions.
+    * Raw pointer
+      ```rust
+      let mut num = 5;
+
+      let r1 = &num as *const i32;
+      let r2 = &mut num as *mut i32;
+
+      unsafe {
+        println!("r1 is: {}", *r1);
+        println!("r2 is: {}", *r2);
+      }
+      ```
+  - Call unsafe functions or methods
+    * Just because a function contains unsafe code doesn't mean we need to mark the entire function as unsafe.
+    * Example:
+    ```rust
+    unsafe fn dangerous() {}
+
+    unsafe {
+        dangerous();
+    }
+    ```
+  - Access or modify a mutable static variable
+  - Implement an unsafe trait
+  - Access fields of `union`.
+* > It's important to understand that unsafe doesn’t turn off the borrow checker or disable any other of Rust's safety checks: if you use a reference in unsafe code, it will still be checked. The unsafe keyword only gives you access to these five features that are then not checked by the compiler for memory safety. You’ll still get some degree of safety inside of an unsafe block.
+* Interacting with other languages:
+  - Rust calling C:
+    ```rust
+    extern "C" {
+        fn abs(input: i32) -> i32;
+    }
+
+    fn main() {
+        unsafe {
+            println!("Absolute value of -3 according to C: {}", abs(-3));
+        }
+    }
+    ```
+  - Other languages calling rust
+    ```rust
+    #[no_mangle]
+    pub extern "C" fn call_from_c() {
+        println!("Just called a Rust function from C!");
+    }
+    ```
+* Implement unsafe trait: ``unsafe impl Foo for ...`` for ``unsafe trait Foo``
+  - Trait is unsafe if **at least one** of its mathods has some invariant that the compiler can't verify.
+
+### Advanced Traits
+
+* **Associated Types** type placeholder with a trait.
+  - Implementor of a trait will define the concrete type.
+  - Example: Iterator
+    ```rust
+    pub trait Iterator {
+      // Type ITEM is a placeholder type
+      type Item;
+
+      fn next(&mut self) -> Option<Self::Item>;
+    }
+    ```
+* Default generic type parameters and operator overloading
+  - Syntax for default type for generic type = <PlacehodlerType=ConcreteType>
+* Type as trait casting: ``<Type as Trait>::function``
+  - Example:
+  ```rust
+  trait Animal {
+      fn baby_name() -> String;
+  }
+
+  struct Dog;
+
+  impl Dog {
+      fn baby_name() -> String {
+          String::from("Spot")
+      }
+  }
+
+  // NOTE HERE: impl Animal for Dog
+  impl Animal for Dog {
+      fn baby_name() -> String {
+          String::from("puppy")
+      }
+  }
+
+  fn main() {
+      // will work (prints "spot")
+      println!("A baby dog is called a {}", Dog::baby_name());
+
+      // won't work -- compile error, cannot infer type
+      println!("A baby dog is called a {}", Animal::baby_name());
+
+      // Will work -- casted
+      println!("A baby dog is called a {}", <Dog as Animal>::baby_name());
+  }
+  ```
