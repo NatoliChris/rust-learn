@@ -1005,3 +1005,108 @@ fn main() {
       println!("A baby dog is called a {}", <Dog as Animal>::baby_name());
   }
   ```
+
+### Advanced Types
+
+* Newtypes can also hide internal implementation.
+* Type _aliases_ give existing types another name.
+  - Example: ``type Kilometers = i32``
+  - Main use is to reduce repetition or lengthy parameters.
+    ```rust
+    let f: Box<dyn Fn() + Send + 'static> = Box::new(|| println!("hi"));
+    fn takes_long_type(f: Box<dyn Fn() + Send + 'static>)
+    // Compared to
+    type Thunk = Box<dyn Fn() + Send + 'static>;
+    let f: Thunk = Box::new(|| println!("hi"));
+    fn takes_long_type(f: Thunk)
+    ```
+* Never type (never returns)
+  - Special type: `!` is the _empty type_: ``fn bar() -> !``
+  - Example #2, `continue` has `!` as the return type.
+* Dynamically sized types (DST) and the `Sized` trait.
+  - `str` is a DST, but `&str` is not.
+  - Not possible to create a variable that has a dynamic size.
+    ```rust
+    // fails to compile:
+    let s1: str = "Hello there";
+    let s2: str = "Why is this a thing?";
+    ```
+  - But, making it `&str` will work.
+    * Can also use `Box<str>` or `Rc<str>`.
+  - Require the `Sized` trait to determine whether a type's size is known at compile time.
+    * Rust automatically adds it to `generic<T>` functions.
+    * A trait bound `?Sized` (e.g.: ``fn generic<T: ?Sized>(t: &T)``)
+
+### Advanced Functions and Closures
+
+* Function pointers
+  - Is possible to pass a pointer to a function as a param.
+    ```rust
+    fn add_one(x: i32) -> i32 {
+        x + 1
+    }
+
+    fn do_twice(f: fn(i32) -> i32, arg: i32) -> i32 {
+        f(arg) + f(arg)
+    }
+    ```
+  - `fn` is a type (rather than  a trait), so must be given in the param.
+  - An example of where you would want to only accept `fn` and not closures is when interfacing with external code that doesn't have closures: C functions can accept functions as arguments, but C doesn't have closures.
+* Returning Closures
+  - Closures represented by traits, therefore, can't return closures directly!
+  - Fails to compile:
+    ```rust
+    fn returns_closure() -> dyn Fn(i32) -> i32 {
+        |x| x + 1
+    }
+    ```
+  - Will compile
+    ```rust
+    fn returns_closure() -> Box<dyn Fn(i32) -> i32> {
+        Box::new(|x| x + 1)
+    }
+    ```
+
+### Macros
+
+* Term **macro** refers to a family of features in rust:
+  - Declerative macros with `macro_rules!`
+  - three kinds of _procedural_ macros:
+    1. Custom `#[derive]` macros that specify code added with `derivce` used on structs and enums.
+    2. Attribute-like macros that define custom attributes.
+    3. Function-like macros that look like function calls but operate on the tokens specified as their arguments.
+* Difference between macros and functions
+  - Fundamentally, macros are _metaprogramming_ (:wow:)
+    * macros used (`println!`, `vec!` expand to produce more code)
+  - Macros can take a variable number of parameters.
+* Declarative macros with `macro_rules!`
+  - Simplified example of ``vec![1, 2, 3]`` (the vec macro)
+    ```rust
+    // Macro_export says that it should be made available in the crate.
+    #[macro_export]
+    macro_rules! vec {
+        ( $( $x:expr ),* ) => {
+            {
+                let mut temp_vec = Vec::new();
+                $(
+                    temp_vec.push($x);
+                )*
+                temp_vec
+            }
+        };
+    }
+    ```
+  - [Macro Pattern Reference](https://doc.rust-lang.org/reference/macros-by-example.html) for other patterns that can be used.
+* Procedural Macros for Generating Code from attributes
+  - Act more like functions
+  - Accept some code as input, operate and produce the same code as output (rather than matching against patterns)
+  - Requires a special crate type?
+    - (TODO: look this up.)
+  - Example:
+    ```rust
+    use proc_macro;
+    #[some_attribute]
+    pub fn some_name(input: TokenStream) -> TokenStream {
+    }
+    ```
+* Custom `#[derive]` macros
