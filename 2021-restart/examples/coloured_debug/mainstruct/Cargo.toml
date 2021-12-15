@@ -1,0 +1,10 @@
+[package]
+name = "mainstruct"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+coloured_debug_derive = { path = "../coloured_debug_derive" }
+colored = "2"
