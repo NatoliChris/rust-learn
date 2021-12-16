@@ -22,11 +22,21 @@ fn handle_connection(mut stream: TcpStream) {
     // Printing the reuqest:
     // println!("Request {}", String::from_utf8_lossy(&buffer[..]));
 
-    // Get the contents of the file
-    let file_content = fs::read_to_string("pages/hello.html").unwrap_or(String::from(""));
+    // A simple get request starting string
+    let get_start_string = b"GET / HTTP/1.1\r\n";
 
-    let response = format!(
-        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
+    let (status_line, filename) = if buffer.starts_with(get_start_string) {
+        ("HTTP/1.1 200 OK", "hello.html")
+    } else {
+        ("HTTP/1.1 404 NOT FOUND", "404.html")
+    };
+
+    // Read the file contents
+    let file_content = fs::read_to_string(format!("pages/{}", filename)).unwrap_or(String::from(""));
+
+    // Format the response
+    let response = format!("{}\r\nContent-Length: {}\r\n\r\n{}",
+        status_line,
         file_content.len(),
         file_content,
     );
