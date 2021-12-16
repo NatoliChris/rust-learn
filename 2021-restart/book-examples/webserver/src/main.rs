@@ -1,6 +1,8 @@
 use std::fs;
 use std::io::prelude::*;
 use std::net::{TcpStream, TcpListener};
+use std::thread;
+use std::time::Duration;
 
 fn main() {
     // Simple listener binding to a port
@@ -22,10 +24,15 @@ fn handle_connection(mut stream: TcpStream) {
     // Printing the reuqest:
     // println!("Request {}", String::from_utf8_lossy(&buffer[..]));
 
-    // A simple get request starting string
-    let get_start_string = b"GET / HTTP/1.1\r\n";
+    // Let's pull out the requests
+    let buffcontents = buffer.splitn(3, |ch| *ch == 32 as u8).collect::<Vec<&[u8]>>();
 
-    let (status_line, filename) = if buffer.starts_with(get_start_string) {
+    // Simple if else to match the filename
+    // NOTE: maybe I can change this to a match?
+    let (status_line, filename) = if buffcontents[1] == b"/sleep" {
+        thread::sleep(Duration::from_secs(10));
+        ("HTTP/1.1 200 OK", "hello.html")
+    } else if buffcontents[1] == b"/" {
         ("HTTP/1.1 200 OK", "hello.html")
     } else {
         ("HTTP/1.1 404 NOT FOUND", "404.html")
