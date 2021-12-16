@@ -13,12 +13,23 @@ pub fn coloured_debug_derive(input: TokenStream) -> TokenStream {
 }
 
 fn impl_coloured_debug(ast: &syn::DeriveInput) -> TokenStream {
-    let name = &ast.ident;
+    let name: &syn::Ident = &ast.ident;
+    // Attributes?
+    let attrs: &Vec<syn::Attribute> = &ast.attrs;
 
     let gen = quote! {
         impl std::fmt::Debug for #name {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                write!(f, "{} {}", "DEBUG".red().bold(), format!("{}", stringify!(#name)).blue().bold())
+                write!(
+                    f,
+                    "{} {}",
+                    "DEBUG".red().bold(),
+                    format!(
+                        "{} {{ {} }}",
+                        stringify!(#name),
+                        stringify!(#(#attrs),*)
+                    ).blue()
+                )
             }
         }
     };

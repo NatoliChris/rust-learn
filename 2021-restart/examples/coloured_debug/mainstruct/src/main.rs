@@ -5,8 +5,12 @@ use colored::*;
 use coloured_debug_derive::ColouredDebug;
 
 #[derive(ColouredDebug)]
-pub struct HelloWorld;
+pub struct HelloWorld {
+    id: u32,
+    name: String,
+}
 
 fn main() {
-    println!("{:?}", HelloWorld{});
+    let a = HelloWorld{ id: 1, name: String::from("hello")};
+    println!("{:?}", a);
 }
